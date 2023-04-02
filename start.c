@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 
 #include "main.h" 
+#include "events.h"
 
 void display(void) {
 	render();

@@ -4,62 +4,106 @@
 #include <stdio.h>
 
 #include "main.h"
+#include "draw.h"
 
 enum Id {RECTANGLE_ID, CIRCLE_ID};
 
-void *state = NULL;
-
 struct Node {
 	enum Id id;
-	void *next;
-	void *prev;
+	struct Node *next;
+	struct Node *prev;
+	void *object;
 };
 
-struct Rectangle {
-	struct Node node;
-	unsigned short x1;
-	unsigned short y1;
-	unsigned short x2;
-	unsigned short y2;
-};
+struct Node *state = NULL;
 
-void drawRectangle(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2) {
-	if(NULL == state) {
-		struct Rectangle *const rectangle = malloc(sizeof(struct Rectangle));
-		rectangle->node.id = RECTANGLE_ID;
-		rectangle->node.next = NULL;
-		rectangle->node.prev = NULL;
-		rectangle->x1 = x1;
-		rectangle->y1 = y1;
-		rectangle->x2 = x2;
-		rectangle->y2 = y2;
-		
-		state = rectangle;
+void addNode(void *object, enum Id id) {
+	struct Node *const node = malloc(sizeof(struct Node));	
+
+	node->id = id;
+	node->next = NULL;
+	node->object = object;
+
+	if(state == NULL) {
+		node->prev = NULL;
+		state = node;
+		return; 
 	}
+
+	struct Node *temp = state;
+
+	while(NULL != temp->next)
+		temp = temp->next;
+	
+	temp->next = node;
+	node->prev = temp;
 }
 
-struct Dummy {
-	struct Node node;
-};	
+struct Rectangle *const drawRectangle(
+	unsigned short x1, 
+	unsigned short y1, 
+	unsigned short x2, 
+	unsigned short y2
+) {	
+	struct Rectangle *const rectangle = malloc(sizeof(struct Rectangle));
+
+	rectangle->x1 = x1;
+	rectangle->y1 = y1;
+	rectangle->x2 = x2;
+	rectangle->y2 = y2;
+
+	addNode(rectangle, RECTANGLE_ID);	
+	
+	return rectangle;
+}
+
+struct Circle *const drawCircle(
+	unsigned short x,
+	unsigned short y,
+	unsigned short r
+) {
+	struct Circle *const circle = malloc(sizeof(struct Circle));
+	
+	circle->x = x;
+	circle->y = y;
+	circle->r = r;
+		
+	addNode(circle, CIRCLE_ID);
+	
+	return circle;	
+}
 
 void render(void) {
-	struct Dummy *object = state;
-	struct Rectangle *rectangle = (struct Rectangle *) object;
-	while(NULL != object) {
-		switch(object->node.id) {
-			case RECTANGLE_ID:
+	struct Node *node = state;
+
+	while(NULL != node) {
+		switch(node->id) {
+			case RECTANGLE_ID: {
+				struct Rectangle *rectangle = (struct Rectangle *) node->object;
+			
 				glBegin(GL_POLYGON);
 					glVertex2i(rectangle->x1, rectangle->y1);
 					glVertex2i(rectangle->x2, rectangle->y1);
 					glVertex2i(rectangle->x2, rectangle->y2);
 					glVertex2i(rectangle->x1, rectangle->y2);
 				glEnd();
-			break;
+				break;
+			}
+			case CIRCLE_ID: {
+				struct Circle *circle = (struct Circle *) node->object;
+				glBegin(GL_POLYGON);
+                			for(float radian = 0; radian <= 2 * PI; radian += PI/180) {
+						glVertex2i(cos(radian) * circle->r + circle->x, sin(radian) * circle->r + circle->y); 
+                
+					}
+				glEnd();
+				break;
+			}
 			default:
 				printf("Unknown object in state list\n");
 		}
 		
-		object = object->node.next;
+		node = node->next;
 	}	
 }
 
