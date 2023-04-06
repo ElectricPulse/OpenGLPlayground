@@ -10,8 +10,8 @@ void display(void) {
 }
 
 void timer() {
-	glutPostRedisplay();
 	eventLoop();
+	glutPostRedisplay();
 	glutTimerFunc(1000/FPS,timer,0);
 }
 

@@ -40,10 +40,10 @@ void addNode(void *object, enum Id id) {
 }
 
 struct Rectangle *const drawRectangle(
-	unsigned short x1, 
-	unsigned short y1, 
-	unsigned short x2, 
-	unsigned short y2
+	coord x1, 
+	coord y1, 
+	coord x2, 
+	coord y2
 ) {	
 	struct Rectangle *const rectangle = malloc(sizeof(struct Rectangle));
 
@@ -58,9 +58,9 @@ struct Rectangle *const drawRectangle(
 }
 
 struct Circle *const drawCircle(
-	unsigned short x,
-	unsigned short y,
-	unsigned short r
+	coord x,
+	coord y,
+	coord r
 ) {
 	struct Circle *const circle = malloc(sizeof(struct Circle));
 	
